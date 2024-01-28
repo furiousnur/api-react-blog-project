@@ -57,6 +57,9 @@ class LoginController extends Controller
             $credentials = $request->only('email', 'password');
             if (auth()->attempt($credentials)) {
                 $user = auth()->user();
+                if (!$user->auth_token) {
+                    return response()->json(['error' => 'The user do not have the token'], 401);
+                }
                 $token = $user->createToken('authToken')->accessToken;
                 $tokenModel = $user->tokens()->where('id', $token->id)->first();
                 $tokenModel->expires_in = 60 * 24; // Set the value accordingly

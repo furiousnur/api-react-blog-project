@@ -18,10 +18,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+/*Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
-});
-Route::middleware(['custom.api.auth', 'auth:api'])->group(function () {
+});*/
+
+Route::middleware(['custom.api.auth'])->group(function () {
     Route::resource('blogs', AdminBlogController::class);
 });
 
