@@ -11,9 +11,9 @@ class CustomApiAuthMiddleware extends Middleware
 {
     public function handle($request, Closure $next, ...$guards)
     {
-        if (! $request->bearerToken()) {
+        /*if (!$request->bearerToken()) {
             return response()->json(['status'=>'error', 'message' => 'Token not provided'], 401);
-        }
+        }*/
         if ($request->bearerToken()){
             $token = $request->bearerToken();
             $decryptedToken = decrypt($token);

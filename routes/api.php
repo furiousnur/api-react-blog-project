@@ -22,12 +22,13 @@ use Illuminate\Support\Facades\Route;
     return $request->user();
 });*/
 
+Route::post('/register', [RegisterController::class, 'register']);
+Route::post('/login', [LoginController::class, 'login']);
+Route::get('/token-verify', [LoginController::class, 'tokenVerify']);
+Route::post('/contact-us', [ContactUsController::class, 'store']);
+
 Route::middleware(['custom.api.auth'])->group(function () {
     Route::resource('blogs', AdminBlogController::class);
+    Route::get('/logout', [LoginController::class, 'logout']);
 });
 
-Route::post('/contact-us',[ContactUsController::class, 'store']);
-Route::post('/register',[RegisterController::class, 'register']);
-Route::post('/login',[LoginController::class, 'login']);
-Route::get('/token-verify',[LoginController::class, 'tokenVerify']);
-Route::get('/logout',[LoginController::class, 'logout']);
