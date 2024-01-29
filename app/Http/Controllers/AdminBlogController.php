@@ -14,7 +14,11 @@ class AdminBlogController extends Controller
      */
     public function index()
     {
-        //
+        $blogs = Blog::with('user')->latest()->get();
+        return response()->json([
+            'status' => 'success',
+            'blogs' => $blogs,
+        ]);
     }
 
     /**
@@ -54,6 +58,7 @@ class AdminBlogController extends Controller
                 'slug' => \Str::slug($request->title),
             ]);
             return response()->json([
+                'status' => 'success',
                 'message' => 'Blog created successfully.',
                 'user' => $blog,  // Include user details if needed
             ]);
@@ -77,7 +82,24 @@ class AdminBlogController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        try {
+            $blog = Blog::find($id);
+            if ($blog == null) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Blog not found.',
+                ], 404);
+            }
+            return response()->json([
+                'status' => 'success',
+                'blog' => $blog,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found.',
+            ], 404);
+        }
     }
 
     /**
@@ -85,7 +107,52 @@ class AdminBlogController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'title' => ['required', 'string', 'unique:blogs,title,'.$id],
+            'category_id' => ['required'],
+            'description' => ['required'],
+            'status' => ['required'],
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+        try {
+            $user = Session::get('user');
+            $blog = Blog::find($id);
+            if ($blog == null) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Blog not found.',
+                ], 404);
+            }
+            if ($blog->user_id != $user->id) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'You are not authorized to update this blog.',
+                ], 403);
+            }
+            $blog->update([
+                'title' => $request->title,
+                'category_id' => $request->category_id,
+                'description' => $request->description,
+                'status' => $request->status,
+                'user_id' => $user->id,
+                'slug' => \Str::slug($request->title),
+            ]);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Blog updated successfully.',
+                'user' => $blog,  // Include user details if needed
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Blog updated failed. Please try again.',
+            ], 500);
+        }
     }
 
     /**
@@ -93,6 +160,31 @@ class AdminBlogController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $user = Session::get('user');
+        try {
+            $blog = Blog::find($id);
+            if ($blog == null) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Blog not found.',
+                ], 404);
+            }
+            if ($blog->user_id != $user->id) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'You are not authorized to delete this blog.',
+                ], 403);
+            }
+            $blog->delete();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Blog deleted successfully.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found.',
+            ], 404);
+        }
     }
 }
