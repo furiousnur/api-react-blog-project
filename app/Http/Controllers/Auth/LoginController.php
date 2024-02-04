@@ -58,7 +58,7 @@ class LoginController extends Controller
             if (auth()->attempt($credentials)) {
                 $user = auth()->user();
                 if (!$user->auth_token) {
-                    return response()->json(['error' => 'The user do not have the token'], 401);
+                    return response()->json(['error' => true,'message' => 'The user do not have the token']);
                 }
                 $token = $user->createToken('authToken')->accessToken;
                 $tokenModel = $user->tokens()->where('id', $token->id)->first();
@@ -74,11 +74,9 @@ class LoginController extends Controller
                     'expires_at' => $token->expires_at,
                 ]);
             }
-            return response()->json(['error' => 'UnAuthorised'], 401);
+            return response()->json(['error' => true,'message' => 'Invalid User'], 401);
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Login failed. Please try again.',
-            ], 500);
+            return response()->json(['error' => true,'message' => 'Login failed. Please try again.'], 500);
         }
     }
 
