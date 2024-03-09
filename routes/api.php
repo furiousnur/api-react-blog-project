@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminBlogController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\ContactUsController;
@@ -29,6 +30,7 @@ Route::post('/contact-us', [ContactUsController::class, 'store']);
 
 Route::middleware(['custom.api.auth'])->group(function () {
     Route::resource('blogs', AdminBlogController::class);
+    Route::resource('users', AdminUserController::class);
     Route::get('/logout', [LoginController::class, 'logout']);
 });
 
