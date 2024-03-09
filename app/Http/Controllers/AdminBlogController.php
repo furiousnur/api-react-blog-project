@@ -97,7 +97,7 @@ class AdminBlogController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'User not found.',
+                'message' => 'Not Authorized.',
             ], 404);
         }
     }

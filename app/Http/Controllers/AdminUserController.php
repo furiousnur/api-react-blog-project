@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Blog;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 
 class AdminUserController extends Controller
 {
@@ -48,7 +51,24 @@ class AdminUserController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        try {
+            $user = User::find($id);
+            if ($user == null) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User not found.',
+                ], 404);
+            }
+            return response()->json([
+                'status' => 'success',
+                'user' => $user,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Not Authorized.',
+            ], 404);
+        }
     }
 
     /**
@@ -56,7 +76,49 @@ class AdminUserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'email' => ['required', 'string', 'unique:users,email,'.$id],
+            'first_name' => ['required'],
+            'last_name' => ['required'],
+            'status' => ['required'],
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+        try {
+            $session_user = Session::get('user');
+            $user = User::find($id);
+            if ($user == null) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User not found.',
+                ], 404);
+            }
+            if ($session_user->id == null) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'You are not authorized to update this user.',
+                ], 403);
+            }
+            $user->update([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'status' => $request->status,
+            ]);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'User updated successfully.',
+                'user' => $user,  // Include user details if needed
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'User updated failed. Please try again.',
+            ], 500);
+        }
     }
 
     /**
