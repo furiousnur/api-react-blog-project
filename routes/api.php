@@ -31,6 +31,7 @@ Route::post('/contact-us', [ContactUsController::class, 'store']);
 Route::middleware(['custom.api.auth'])->group(function () {
     Route::resource('blogs', AdminBlogController::class);
     Route::resource('users', AdminUserController::class);
+    Route::get('user/approve-reject/{action}/{id}', [AdminUserController::class, 'approveOrReject']);
     Route::get('/logout', [LoginController::class, 'logout']);
 });
 

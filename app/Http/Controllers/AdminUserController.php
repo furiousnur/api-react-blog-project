@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Blog;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -127,5 +126,45 @@ class AdminUserController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function approveOrReject($action, $id){
+        try {
+            $user = User::find($id);
+            if ($user == null) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User not found.',
+                ], 404);
+            }
+            if ($action == 'approve') {
+                $user->update([
+                    'status' => 'Active',
+                ]);
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'User approved successfully.',
+                    'user' => $user,  // Include user details if needed
+                ]);
+            } else if ($action == 'reject') {
+                $user->update([
+                    'status' => 'Inactive',
+                ]);
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'User rejected successfully.',
+                    'user' => $user,  // Include user details if needed
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Invalid action.',
+                ], 400);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'User action failed. Please try again.',
+            ], 500);
+        }
     }
 }
